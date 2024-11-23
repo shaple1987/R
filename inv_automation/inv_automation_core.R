@@ -2,8 +2,9 @@ library(readxl)
 library(dplyr)
 library(data.table)
 library(reshape2)
-RETIRE_ACCTS<-c("LY Trad","Roth")
-NON_RETIRE_ACCTS<-c("LY Ally","Joint","ESPP","RSU_BLK","LY Ind")
+options(stringsAsFactors = FALSE)
+RETIRE_ACCTS<-read.csv("~/Hai/inv_automation/local_config/RETIRE_ACCTS.csv")$Acct
+NON_RETIRE_ACCTS<-read.csv("~/Hai/inv_automation/local_config/NON_RETIRE_ACCTS.csv")$Acct
 fn <- "~/Hai/inv_automation/Inv Workbook.xlsx"
 
 

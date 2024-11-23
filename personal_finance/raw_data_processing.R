@@ -8,8 +8,8 @@ INC_TYPES<<-c("Income","Inv Income","Fam Income","Gift")
 TRANSFER_TYPES<<-c("Transfer","Transfer(Default)")
 INVESTMENT_TYPES<<-c("Investments")
 
-source("~/Hai/raw_records/util.R")
-source("~/Hai/raw_records/core_functions.R")
+source("~/Hai/Code/R/personal_finance/util.R")
+source("~/Hai/Code/R/personal_finance/core_functions.R")
 
 ############ Main Script #######
 force.run <- T

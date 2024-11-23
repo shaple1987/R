@@ -1,6 +1,7 @@
 source("~/Hai/Code/R/inv_automation/inv_automation_core.R")
+local_config_excluded_tickers <- "~/Hai/inv_automation/local_config/excluded_tickers.csv"
 
-pivot_driver <- function(pos, as_of = Sys.Date(), excl_blk = F, console_printout = T, view_pos_only = F){
+pivot_driver <- function(pos, as_of = Sys.Date(), excl_tickers = F, console_printout = T, view_pos_only = F){
   
   obj <- list()
   message(sprintf("Main dashboard (as of %s)", as_of))
@@ -11,7 +12,10 @@ pivot_driver <- function(pos, as_of = Sys.Date(), excl_blk = F, console_printout
     obj$optops <- NULL
   }
   dashboard <- create.main.dashboard(obj$pos, div, px, as_of)
-  if(excl_blk) obj$dashboard <- subset(obj$dashboard, Ticker != "BLK")
+  if(excl_tickers){
+    excluded_tickers <- read.csv(local_config_excluded_tickers)$Ticker
+    dashboard <- subset(dashboard, !Ticker %in% excluded_tickers)
+  }
   rm(pos)
   
   not_covered <- setdiff(dashboard$Ticker, char$Ticker)
@@ -96,8 +100,8 @@ if(F){
   })
   zz <- format_output(allobjs, "z0")
   zz1 <- format_output(allobjs, "z_ticker")
-  write.csv(zz,sprintf("~/Hai/Spreadsheets/inv_automation/monthly_summary_%s2.csv", dates_all[length(dates_all)]),row.names=F)
-  write.csv(zz1,sprintf("~/Hai/Spreadsheets/inv_automation/monthly_summary_by_ticker%s2.csv", dates_all[length(dates_all)]),row.names=F)
+  write.csv(zz,sprintf("~/Hai/inv_automation/monthly_summary_%s2.csv", dates_all[length(dates_all)]),row.names=F)
+  write.csv(zz1,sprintf("~/Hai/inv_automation/monthly_summary_by_ticker%s2.csv", dates_all[length(dates_all)]),row.names=F)
 }
 
 obj1 <- pivot_driver(pos, view_pos_only = F)
