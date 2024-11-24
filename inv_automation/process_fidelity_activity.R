@@ -1,4 +1,4 @@
-fn <- "C:/Users/where/Downloads/Accounts_History (1).csv"
+fn <- "C:/Users/where/Downloads/Accounts_History (1).csv" # activities downloaded from Fidelity
 local_config_account_map <- "~/Hai/inv_automation/local_config/account_map.csv"
 
 dt1 <- readLines(fn)
