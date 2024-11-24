@@ -87,25 +87,18 @@ update_div_history <- function(){
   as.data.frame(rbindlist(out))
 }
 
-update_px_history <- function(dates, last = 1, tickers_override = c("")){
-  
-  if(!is.null(last)) dates <- tail(dates, last)
-  
-  # Load tickers
-  if(tickers_override[1] == ""){
-    tickers<-read_excel("~/Hai/Spreadsheets/inv_automation/Inv Workbook.xlsx",sheet = "Positions",range = "A1:A1000")$Ticker
-    tickers<-na.omit(unique(tickers))
-    excl_tickers<-c("WORK","USTreasury","UBA","GIGE","PTRAQ","AYX")
-    tickers<-setdiff(tickers,excl_tickers)
-  }else{
-    tickers <- tickers_override
-  }
-  
+update_px_history <- function(dates, tickers){
   out<-data.frame()
-  
   for(date in dates){
-    print(sprintf("Getting prices for %s", date))
+    print(sprintf("Getting prices for %s", as.Date(date)))
     out<-rbind(out,get_prices_by_date(tickers, as.Date(date)))
   }
   out
+}
+
+get_month_end_dates <- function(start = "202201", end = format(Sys.Date(), "%Y%m")){
+  yms <- seq(start, end, by = 1)
+  yms <- yms[yms %% 100 >= 1 & yms %% 100 <= 12]
+  dates <- as.Date(as.character(yms * 100 + 1), "%Y%m%d") - 1
+  dates
 }
