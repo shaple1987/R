@@ -49,8 +49,3 @@ if(update.px){
     print("No new price data to output")
   }  
 }
-
-#sdate <- as.Date("2017-01-01")
-#edate <- as.Date("2023-05-31")
-#out <- get_prices_by_date_range(tickers, sdate, edate)
-#saveRDS(out, "~/Hai/inv_automation/market_data/stock_price_daterange.rds")
