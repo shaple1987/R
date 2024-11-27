@@ -5,6 +5,8 @@ library(readxl)
 library(xts)
 library(rvest)
 
+HOLIDAY_CALENDAR <- read.delim("~/Hai/Code/R/global_config/holidays.txt", header = FALSE, colClasses = "Date")$V1
+
 extract_div <- function(ticker, start_date = NULL){
   message(sprintf("Getting div history for %s", ticker))
   doc <- rvest::read_html(sprintf("https://www.dividendinformation.com/search_ticker/?identifier=%s", ticker))
@@ -96,9 +98,11 @@ update_px_history <- function(dates, tickers){
   out
 }
 
-get_month_end_dates <- function(start = "202201", end = format(Sys.Date(), "%Y%m")){
-  yms <- seq(start, end, by = 1)
-  yms <- yms[yms %% 100 >= 1 & yms %% 100 <= 12]
-  dates <- as.Date(as.character(yms * 100 + 1), "%Y%m%d") - 1
-  dates
+get_month_end_dates <- function(start = as.Date("2021-12-31"), end = as.Date(paste0(format(Sys.Date(),"%Y-%m"),"-01"))-1, weekends = FALSE, holidays =  HOLIDAY_CALENDAR){
+  dates <- seq.Date(start, end, by = 1)
+  dates <- dates[!dates %in% holidays]
+  if(!weekends) dates <- dates[!weekdays(dates,abbreviate =  T) %in% c("Sat","Sun")]
+  out <- sapply(split(dates, format(dates, "%Y%m")), function(x) x[length(x)])
+  out <- as.Date(as.numeric(out), origin = '1970-01-01')
+  out
 }
