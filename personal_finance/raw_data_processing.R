@@ -1,8 +1,6 @@
-#rm(list=ls())
-
-checking_types<<-c("BOA Checking","ally","ChaseCheckingSaving")
-CC_ACCTS<<-c("fidelity","7375","2695","7309","Discover","Amex")
-DC_ACCTS<<-c("ally","BOAChecking","ChaseCheckingSaving","PNC","espp_blk","espp_mmc","401k")
+checking_types<<-read.csv("~/Hai/raw_records/config/checking_types.csv")$Type
+CC_ACCTS<<-read.csv("~/Hai/raw_records/config/CC_ACCTS.csv")$Acct
+DC_ACCTS<<-read.csv("~/Hai/raw_records/config/DC_ACCTS.csv")$Acct
 EXP_TYPES<<-c("Exp","Exp(Default)","Exp(Reimbursement)")
 INC_TYPES<<-c("Income","Inv Income","Fam Income","Gift")
 TRANSFER_TYPES<<-c("Transfer","Transfer(Default)")

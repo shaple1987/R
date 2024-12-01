@@ -1,5 +1,3 @@
-#Sys.setenv(GITDIR="/u1/build/GIT")
-#source("/usr/local/bfm/lib/R/prutil/init.R") # to check whether this is necessary
 options(stringsAsFactors = F)
 library(plyr)
 library(data.table)
