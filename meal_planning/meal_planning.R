@@ -1,5 +1,7 @@
 rm(list=ls())
-Sys.setlocale("LC_ALL","Chinese")
+Sys.setlocale("LC_ALL","chs")
+# run the above two lines, then run the following:
+# source("~/Hai/Code/R/meal_planning/meal_planning.R", encoding='UTF-8')
 options(stringsAsFactors = F)
 
 START_DATE <- Sys.Date() + 1
@@ -21,10 +23,11 @@ banned_items <- c("海带","肥牛片","牛尾","猪肝","黄豆芽","绿豆芽"
 
 END_DATE <- START_DATE + NDAYS - 1
 out_file <- sprintf("%s_to_%s.csv", START_DATE, END_DATE)
+out_file_long <- sprintf("%s_to_%s_longform.csv", START_DATE, END_DATE)
 processed_masterlist_file <- sprintf("%s_to_%s_processed_masterlist.rds", START_DATE, END_DATE)
 
-setwd("~/Hai/Meal Planning")
-source("meal_planning_funcs.R", encoding = "UTF-8")
+source("~/Hai/Code/R/meal_planning/meal_planning_funcs.R", encoding = "UTF-8")
+setwd("~/Hai/Meal Planning/")
 
 ### main script
 
@@ -33,18 +36,26 @@ masterlist <<- read_xlsx("meal_planning.xlsx",sheet = "MasterList", range = "A1:
 masterlist <- subset(masterlist, !is.na(Name))
 
 message("Load ingredient database")
-DB <<- read_xlsx("meal_planning.xlsx",sheet = "Ingredients", range = "A1:C1000") %>% as.data.frame
+DB <<- read_xlsx("meal_planning.xlsx",sheet = "Ingredients_NEW", range = "A1:G1000") %>% as.data.frame
 DB <- subset(DB, !is.na(Name))
+
+message("Load ingredient database from GoogleSheet (NEW)")
+DB2 <<- tryCatch(read_gsheet_ingredients(),
+              error=function(e){
+              message(sprintf("Error condition: {%s}", e))
+              print("Cannot connect to Googlesheet, using local cache as backup")             
+              DB
+            }
+)
 
 history <- load_history()
 
 message("Load inventory")
-inventory <- read_xlsx("meal_planning.xlsx",sheet = "Inventory", range = "A1:I1000") %>% as.data.frame
-inventory <- subset(inventory, !is.na(Name))
-inventory$Expiry <- as.Date(inventory$Expiry)
+inventory <- DB2
 inventory_full <- inventory
-inventory <- subset(inventory, (is.na(Used) | Used == 0.5))
+inventory <- subset(inventory, Remaining > 0)
 # TODO print out warning for expired / soon-to-expire food
+#inventory$Expiry <- as.Date(inventory$Expiry) # not implemented
 #inventory <- subset(inventory, Expiry >= Sys.Date())
 
 all_items <- gen_vector(gen_list(masterlist$Ingredients))
@@ -108,7 +119,8 @@ if(file.exists(out_file)){
 out_long <- reformat_output(out)
 
 if(write.output.file){
-  write_excel_csv(out_long, path = out_file)
+  write_excel_csv(out, path = out_file)
+  write_excel_csv(out_long, path = out_file_long)
 }
 View(out)
 
@@ -124,10 +136,10 @@ print(gen_organized_list(subset(il, InStock=="None")$Item, optional_handling = "
 message("Shopping List (low stock item that will be used more than once)")
 print(gen_organized_list(subset(il, InStock=="Low" & UsedFrequency>1)$Item, optional_handling = "remove"))
 message("Shopping List (常备佐料)")
-print(gen_organized_list(setdiff(DB$Name[DB$Type=="常备佐料"], subset(inventory_full, is.na(Used) & Type == "常备佐料")$Name)))
+print(gen_organized_list(setdiff(DB$Name[DB$Type=="常备佐料"], subset(inventory_full, Remaining > 0 & Type == "常备佐料")$Name)))
 
 message("These items might have been used too frequently")
 print(subset(il, UsedFrequency > WeeklyLimit))
-# low stock item
-View(subset(il, InStock=="Low"))
+# low stock item (need to revamp)
+#View(subset(il, InStock=="Low"))
 

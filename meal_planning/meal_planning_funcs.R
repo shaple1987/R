@@ -2,6 +2,7 @@
 library(readxl)
 library(readr)
 library(dplyr)
+library(googlesheets4)
 
 gen_list <- function(vector, collapse="、"){
   paste(vector, collapse=collapse)
@@ -165,10 +166,10 @@ post_process_ingredient_list <- function(ingredient_list, inventory){
   ingredient_list$WeeklyLimit[is.na(ingredient_list$WeeklyLimit)] <- 2
   #browser()
   
-  # label in-stock status
+  # label in-stock status (need new way to define Low Stock)
   ingredient_list$InStock <- "None"
-  ingredient_list$InStock[which(remove_optional(ingredient_list$Item) %in% inventory$Name[which(inventory$Used==0.5)])]<-"Low"
-  ingredient_list$InStock[which(remove_optional(ingredient_list$Item) %in% inventory$Name[is.na(inventory$Used)])]<-"InStock"
+  #ingredient_list$InStock[which(remove_optional(ingredient_list$Item) %in% inventory$Name[which(inventory$Used==0.5)])]<-"Low"
+  ingredient_list$InStock[which(remove_optional(ingredient_list$Item) %in% inventory$Name[which(inventory$Remaining>0)])]<-"InStock"
   
   return(ingredient_list)
 }
@@ -184,4 +185,10 @@ expand_delimited_column <- function(df, delimited_column, other_columns = setdif
   }
   if(length(other_columns) == 1) names(out)[1] <- other_columns
   out
+}
+
+### interact with Google Sheets
+read_gsheet_ingredients <- function(){
+  df <- read_sheet("1wwVGRVPX8uz04NZv6ge2yMpHEdTkdxFvAGmHe60rn-w", sheet = 'Ingredients', range = "A1:G1000")
+  df[!is.na(df$Name), ]
 }
