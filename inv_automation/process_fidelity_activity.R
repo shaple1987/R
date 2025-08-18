@@ -2,7 +2,7 @@ fn <- "C:/Users/where/Downloads/Accounts_History (1).csv" # activities downloade
 local_config_account_map <- "~/Hai/inv_automation/local_config/account_map.csv"
 
 dt1 <- readLines(fn)
-idx <- grep("^ [:0-9:]{2}/", dt1)
+idx <- grep("^[:0-9:]{2}/", dt1)
 dt1<-dt1[c(min(idx)-1,idx)]
 fn_processed <- sub(".csv$", "_processed.csv", fn)
 fileConn<-file(fn_processed)
@@ -16,8 +16,8 @@ dt <- read.csv(fn_processed, stringsAsFactors = F)
 account_map<-read.csv(local_config_account_map)
 
 dt$AcqDate <- as.Date(dt$Run.Date,"%m/%d/%Y")
-idx <- setdiff(grep("^ REINVESTMENT", dt$Action), grep("^ REINVESTMENT CASH", dt$Action))
-idx <- c(idx, grep("^ YOU BOUGHT", dt$Action))
+idx <- setdiff(grep("^REINVESTMENT", dt$Action), grep("^REINVESTMENT CASH", dt$Action))
+idx <- c(idx, grep("^YOU BOUGHT", dt$Action))
 dt <- dt[idx,]
 dt$Symbol <- trimws(dt$Symbol)
 if(!"Account" %in% names(dt)){
