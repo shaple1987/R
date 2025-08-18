@@ -1,3 +1,6 @@
+source("~/Hai/Code/R/personal_finance/util.R")
+source("~/Hai/Code/R/personal_finance/core_functions.R")
+
 checking_types<<-read.csv("~/Hai/raw_records/config/checking_types.csv")$Type
 CC_ACCTS<<-read.csv("~/Hai/raw_records/config/CC_ACCTS.csv")$Acct
 DC_ACCTS<<-read.csv("~/Hai/raw_records/config/DC_ACCTS.csv")$Acct
@@ -6,14 +9,11 @@ INC_TYPES<<-c("Income","Inv Income","Fam Income","Gift")
 TRANSFER_TYPES<<-c("Transfer","Transfer(Default)")
 INVESTMENT_TYPES<<-c("Investments")
 
-source("~/Hai/Code/R/personal_finance/util.R")
-source("~/Hai/Code/R/personal_finance/core_functions.R")
-
 ############ Main Script #######
 force.run <- T
 update.csv <- F
 update.total.by.cat.overtime <- F
-message("Last updated: 11/4/2024")
+message("Last updated: 7/2/2025, Last Date Capped at 6/30/2025")
 
 if(!"all_accts" %in% ls() || force.run){
   all_accts<-list()
@@ -135,7 +135,7 @@ print(sprintf("%d non-zero entries out of %d, RMSD = %.02f", length(which(transf
 transfers_byym_nonzero <- subset(transfers_byym, net!=0)
 
 # monthly summary by year
-years <- 2020:2024
+years <- 2020:year(max(all_records2$Date))
 allobjs <- vector("list", length(years))
 names(allobjs) <- paste0("y", years)
 for (i in 1:length(years)){
