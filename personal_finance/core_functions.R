@@ -262,7 +262,7 @@ raw_data_process<-function(card,type=card,startbal=0,fullhistfile="fullhistory.R
   if(type=="Amex") signature<-".csv"
   if(type=="ChaseCheckingSaving") signature<-"Chase"
   
-  files<-grep(signature,dir(),value=T)
+  files<-grep(signature,grep(".(csv|CSV)$",dir(),value=T),value=T)
   if(length(files)==0){
     print("No new file to be processed")
     outfull<-readRDS(fullhistfile)
@@ -756,6 +756,13 @@ mortgage.split <- function(all_records, note, company){
 
   all_records <- rbind(subset(all_records, !(Note == note & Credit > 0)), loan)
   all_records
+}
+
+# shortcut func
+SC_SHOW_UNCATEGORIZED <- function(df, threshold = 500, min_date = '2024-01-01'){
+  out <- subset(df, (Debit >= threshold | Credit >= threshold) & Date >= min_date & Category == 'uncategorized')
+  print(sprintf("Net amount: %.02f", sum(out$Credit)-sum(out$Debit)))
+  out
 }
 
 # load config
