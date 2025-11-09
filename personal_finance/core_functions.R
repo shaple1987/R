@@ -16,6 +16,8 @@ disambiguate_cc<-function(all_records, old_note="AMEX PAYBACK", new_note = "AMEX
 assign.acct2<-function(all_accts,debug=F){
   
   all_records <- as.data.frame(rbindlist(all_accts))
+  all_records <- fix_encoding(all_records)
+  all_records$Note <- cleanup_chrs(all_records$Note)
   
   # split certain records
   split_configfile <- "splits.csv"
@@ -49,7 +51,6 @@ assign.acct2<-function(all_accts,debug=F){
   n_unique_keys<-length(unique(all_records$Key))
   message(sprintf("%d total records, %d unique keys", n_all_records, n_unique_keys))
   if(n_all_records!=n_unique_keys) stop("Error! Duplicative keys")
-  
   all_records$Note <- toupper(all_records$Note)
   all_records <- standardize.text(all_records,"Note","Note")
   
@@ -104,7 +105,7 @@ assign.acct2<-function(all_accts,debug=F){
   four01k$Range <- NULL
   four01k$Date <- as.Date(four01k$Date)
   four01k <- subset(four01k, !is.na(Date))
-  four01k <- melt(four01k,id.vars = "Date")
+  four01k <- reshape2::melt(four01k,id.vars = "Date")
   four01k <- subset(four01k, value!=0)
 
   four01k_inc <- data.frame(Note = paste0("BLK PAYROLL (", toupper(four01k$variable),")"),
@@ -171,6 +172,9 @@ assign.acct2<-function(all_accts,debug=F){
 standardize.text<-function(data,incol,outcol=paste0(incol,".standardized"),
                            configfile="standardizer.csv",filler=c("incol","uncategorized","na")[1],silent=T,zero.warning=T){
   config<-read.csv(sprintf("~/Hai/raw_records/config/%s",configfile))
+  config<-fix_encoding(config)
+  config$pattern <- cleanup_chrs(config$pattern)
+  
   if(filler=="incol") data[,outcol]<-data[,incol]
   else if(filler=="na") data[,outcol]<-NA
   else data[,outcol]<-filler
@@ -763,6 +767,23 @@ SC_SHOW_UNCATEGORIZED <- function(df, threshold = 500, min_date = '2024-01-01'){
   out <- subset(df, (Debit >= threshold | Credit >= threshold) & Date >= min_date & Category == 'uncategorized')
   print(sprintf("Net amount: %.02f", sum(out$Credit)-sum(out$Debit)))
   out
+}
+
+fix_encoding <- function(df, from = "latin1", to = "UTF-8") {
+  df[] <- lapply(df, function(col) {
+    if (is.character(col)) {
+      bad <- is.na(iconv(col, from = to, to = to))
+      if (any(bad)) {
+        col <- iconv(col, from = from, to = to, sub = "byte")
+      }
+    }
+    col
+  })
+  df
+}
+
+cleanup_chrs <- function(x){
+  gsub("\u00A0", " ", x, fixed = FALSE)
 }
 
 # load config

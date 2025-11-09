@@ -73,7 +73,7 @@ exps_by_note_ytd<-standardize.text(exps_by_note_ytd,"Note","Category","categoriz
 #print(head(subset(exps_by_note_ytd,Category=='uncategorized')))
 exps$Group <- map$Group_since202406[match(exps$Category, map$Category)]
 daily_exp_by_group <- exps %>% group_by(Date, Group) %>% summarise(exp = sum(Credit)-sum(Debit))
-daily_exp_by_group <- dcast(daily_exp_by_group, "Date ~ Group",value.var="exp",fill=0)
+daily_exp_by_group <- reshape2::dcast(daily_exp_by_group, "Date ~ Group",value.var="exp",fill=0)
 exps$Group<-NULL
 
 if(update.csv) write.csv(exps,"~/Hai/raw_records/outfiles/expenses.csv",row.names=F)
