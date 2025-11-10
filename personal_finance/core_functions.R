@@ -61,7 +61,8 @@ assign.acct2<-function(all_accts,debug=F){
                            grep("^ONLINE SCHEDULED TRANSFER TO SAV 8117",all_records$Note),
                            grep("^ONLINE BANKING TRANSFER FROM SAV 8117",all_records$Note),
                            grep("^KEEP THE CHANGE TRANSFER TO ACCT 8117",all_records$Note),
-                           grep("^KEEP THE CHANGE TRANSFER FROM CHK 6175",all_records$Note))
+                           grep("^KEEP THE CHANGE TRANSFER FROM CHK 6175",all_records$Note),
+                           grep("^KEEPTHECHANGE CREDIT FROM ACCT6175",all_records$Note))
   #check
   if(length(idx_internal_transfer)>0){
     out1<-all_records[idx_internal_transfer,]
