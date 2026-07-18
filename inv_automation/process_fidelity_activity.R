@@ -23,6 +23,7 @@ dt$Symbol <- trimws(dt$Symbol)
 if(!"Account" %in% names(dt)){
   dt$AccountShort <- readline(prompt = sprintf("Enter the account info manually. Choices (%s) ", paste(account_map$Account_Short, collapse = ", ")))
 }else{
+  dt$Account <- paste(dt$Account, dt$Account.Number)
   dt$AccountShort <- account_map$Account_Short[match(dt$Account,account_map$Account)]
 }
 dt$Active <- 1
