@@ -29,7 +29,7 @@ calc.div.by.pos <- function(pos, div, by = c("month", "year")[1]){
   out <- merge(pos_e, div, by.x = c("Ticker", "Date"), by.y=c("Ticker","ExDate"), all.y = T)
   out <- subset(out, !is.na(ID))
   out$groupbycol <- format(out$Date, date_format)
-  out2 <- out %>% group_by(ID, groupbycol) %>% dplyr::summarise(TotalDiv = sum(`CASH AMOUNT`))
+  out2 <- out %>% group_by(ID, groupbycol) %>% dplyr::summarise(TotalDiv = sum(`CASH AMOUNT`),.groups = "keep")
   out3<-dcast(out2, ID~groupbycol, value.var="TotalDiv", FUN=sum)
   names(out3)[-1] <- paste0("Div", names(out3)[-1]) 
   pos <- merge(pos, out3, by="ID", all.x = T)
@@ -202,7 +202,8 @@ inv_pivot <- function(db, group_by_var=c("Ticker", "Account", "VintageYear", "Cl
               AvgPctCapGain=SoldPricePerShare/CostBasisPerShare-1,
               AvgPctDivYield=AvgPctPNL-AvgPctCapGain,
               DivCapGainRatio=AvgPctDivYield/AvgPctCapGain,
-              SumTotalDiv=SumTotalCostBasis*AvgPctDivYield
+              SumTotalDiv=SumTotalCostBasis*AvgPctDivYield,
+              .groups = "keep"
     ) %>%
     as.data.frame
   
@@ -221,6 +222,22 @@ inv_pivot <- function(db, group_by_var=c("Ticker", "Account", "VintageYear", "Cl
       dplyr::summarise(TotalOptionPNL = sum(PNL)) %>%
       as.data.frame
     out$SumOptionPNL <- 0
+    missing_items_in_out <- setdiff(optpos[,group_by_var], out[,group_by_var])
+    if(length(missing_items_in_out)){
+      print(sprintf("Creating synthetic entries for %s", paste(missing_items_in_out, collapse = ", ")))
+      out_synthetic <- out[rep(1,length(missing_items_in_out)),]
+      out_synthetic[,group_by_var] <- missing_items_in_out
+      out_synthetic$Active <- 0
+      out_synthetic$SumNumShares <- 0
+      out_synthetic$CostBasisPerShare <- NaN
+      out_synthetic$SoldPricePerShare <- NaN
+      out_synthetic$SumTotalCostBasis <- 0
+      out_synthetic$SumTotalPNL <- 0
+      # fill rest of the columns NaN (hacky)
+      rest_of_cols <- colnames(out)[8:length(colnames(out))]
+      out_synthetic[, rest_of_cols] <- NaN
+      out <- rbind(out, out_synthetic)
+    }
     idx_add_opt <- which(out$Active==0 & out[,group_by_var] %in% optpos[,group_by_var])
     out$SumOptionPNL[idx_add_opt] <- optpos$TotalOptionPNL[match(out[idx_add_opt,group_by_var], optpos[,group_by_var])]
     out$SumTotalPNL <- out$SumTotalPNL + out$SumOptionPNL

@@ -24,7 +24,7 @@ pivot_driver <- function(pos, as_of = Sys.Date(), excl_tickers = F, console_prin
   
   message("Active position summary")
   pos_a <- subset(obj$pos, Active == 1)
-  out <- pos_a %>% group_by(Account, Ticker) %>% dplyr::summarise(TotalPos = sum(NumShares))
+  out <- pos_a %>% group_by(Account, Ticker) %>% dplyr::summarise(TotalPos = sum(NumShares),.groups="keep")
   out <- dcast(out, Ticker~Account, value.var='TotalPos')
   out$Total <- rowSums(out[,-1],na.rm = T)
   obj$pos_summary <- out
