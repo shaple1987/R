@@ -156,7 +156,7 @@ assign.acct2<-function(all_accts,debug=F){
                  grep("REFUND", out3$Note), grep("RETURNED$", out3$Note),
                  grep("RECALLED$", out3$Note)) 
   out3$acct2[intersect(which(is.na(out3$acct2)), idx_reimb)] <- "Exp(Reimbursement)"
-  idx_inc <- grep("CASHBACK$", out3$Note)
+  idx_inc <- c(grep("CASHBACK$", out3$Note), grep("CASH BACK", out3$Note))
   out3$acct2[intersect(which(is.na(out3$acct2)), idx_inc)] <- "Income"
   out3$acct2[is.na(out3$acct2)]<-"Transfer(Default)"
 
