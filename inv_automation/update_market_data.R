@@ -16,7 +16,7 @@ if(update.px){
   # Load tickers
   tickers<-read_excel(fn,sheet = "Positions",range = "A1:A1000")$Ticker
   tickers<-na.omit(unique(tickers))
-  excl_tickers<-c("WORK","USTreasury","UBA","GIGE","PTRAQ","AYX")
+  excl_tickers<-c("WORK","USTreasury","UBA","GIGE","PTRAQ","AYX","SQ")
   tickers<-setdiff(tickers,excl_tickers)
 
   message("Loding existing price time series")
