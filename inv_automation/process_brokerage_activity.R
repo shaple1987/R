@@ -1,5 +1,6 @@
-fn <- "C:/Users/where/Downloads/Accounts_History (1).csv" # activities downloaded from Fidelity
+fn <- "C:/Users/where/Downloads/Accounts_History (3).csv" # activities downloaded from brokerage1 (at this point, only support single brokerage)
 local_config_account_map <- "~/Hai/inv_automation/local_config/account_map.csv"
+local_config_brokerages <- "~/Hai/inv_automation/local_config/brokerages.csv"
 
 dt1 <- readLines(fn)
 idx <- grep("^[:0-9:]{2}/", dt1)
@@ -14,6 +15,7 @@ dt <- read.csv(fn_processed, stringsAsFactors = F)
 #Ticker	Account	Active	NumShares	AcqDate	CostBasisPerShare
 
 account_map<-read.csv(local_config_account_map)
+brokerages<-read.csv(local_config_brokerages)
 
 dt$AcqDate <- as.Date(dt$Run.Date,"%m/%d/%Y")
 idx <- setdiff(grep("^REINVESTMENT", dt$Action), grep("^REINVESTMENT CASH", dt$Action))
@@ -40,4 +42,4 @@ if(length(treasury_symbols)){
   dt2$CostBasisPerShare[treasury_symbols] <- dt2$CostBasisPerShare[treasury_symbols]*100  
 }
 
-write.csv(dt2, "~/Hai/inv_automation/fidelity_activity.csv",row.names=F)
+write.csv(dt2, sprintf("~/Hai/inv_automation/%s_activity.csv", brokerages$Brokerage[1]),row.names=F)
