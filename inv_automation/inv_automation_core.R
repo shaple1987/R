@@ -222,7 +222,8 @@ inv_pivot <- function(db, group_by_var=c("Ticker", "Account", "VintageYear", "Cl
       dplyr::summarise(TotalOptionPNL = sum(PNL)) %>%
       as.data.frame
     out$SumOptionPNL <- 0
-    missing_items_in_out <- setdiff(optpos[,group_by_var], out[,group_by_var])
+    # this is to make sure that for grouping where there is no closed position in cash acct but has closed position in option acct
+    missing_items_in_out <- setdiff(optpos[,group_by_var], out[out$Active==0,group_by_var])
     if(length(missing_items_in_out)){
       print(sprintf("Creating synthetic entries for %s", paste(missing_items_in_out, collapse = ", ")))
       out_synthetic <- out[rep(1,length(missing_items_in_out)),]
@@ -345,6 +346,15 @@ activeopt <- function(obj1){
 }
 closedopt <- function(obj1){
   obj1$z_ticker %>% filter (Ticker %in% subset(obj1$optops, Active==0)$Ticker)  
+}
+
+format_output <- function(allobjs, element){
+  as.data.frame(rbindlist(lapply(allobjs,function(x){
+    out <- x[[element]]
+    temp <- names(out)
+    out$date <- x$date
+    out[, c("date", temp)]
+  })))
 }
 
 message("Characteristics and Styles")
